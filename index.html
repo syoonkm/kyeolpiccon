@@ -55,14 +55,11 @@
 
     <!-- Header -->
     <header class="bg-white shadow-sm sticky top-0 z-30">
-        <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-center">
             <div class="flex items-center space-x-2">
                 <i data-lucide="flower-2" class="text-cherry-500 w-8 h-8"></i>
                 <h1 class="text-xl md:text-2xl font-bold text-cherry-700 tracking-tight">봄빛 벚꽃 사진전</h1>
             </div>
-            <button onclick="downloadCSV()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 py-1.5 px-3 rounded-full flex items-center transition">
-                <i data-lucide="download" class="w-3 h-3 mr-1"></i> 관리자 데이터 다운
-            </button>
         </div>
     </header>
 
@@ -104,7 +101,7 @@
                 </h2>
                 <span class="bg-cherry-100 text-cherry-700 text-sm font-bold px-3 py-1 rounded-full" id="classVoteStatus">0 / 1 선택됨</span>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="classPhotosContainer">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8" id="classPhotosContainer">
                 <!-- 반별 사진 렌더링 영역 -->
             </div>
         </section>
@@ -117,7 +114,7 @@
                 </h2>
                 <span class="bg-cherry-100 text-cherry-700 text-sm font-bold px-3 py-1 rounded-full" id="indivVoteStatus">0 / 3 선택됨</span>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-8" id="individualPhotosContainer">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-8 md:gap-10 lg:gap-12" id="individualPhotosContainer">
                 <!-- 개인별 사진 렌더링 영역 -->
             </div>
         </section>
@@ -253,7 +250,7 @@
                 
                 const card = document.createElement('div');
                 card.className = `bg-white rounded-xl overflow-hidden border-2 transition-all duration-200 cursor-pointer 
-                                  ${isSelected ? 'selected-card' : 'border-transparent hover:border-cherry-200 shadow-sm hover:shadow-md'}
+                                  ${isSelected ? 'selected-card' : 'border-gray-200 hover:border-cherry-300 shadow-md hover:shadow-lg'}
                                   ${isDisabled ? 'disabled-card' : ''}`;
                 
                 // 클릭 이벤트 (비활성화 상태가 아닐 때만)
@@ -291,7 +288,7 @@
                 
                 const card = document.createElement('div');
                 card.className = `bg-white rounded-xl overflow-hidden border-2 transition-all duration-200 flex flex-col
-                                  ${isSelected ? 'selected-card' : 'border-transparent hover:border-cherry-200 shadow-sm hover:shadow-md'}
+                                  ${isSelected ? 'selected-card' : 'border-gray-200 hover:border-cherry-300 shadow-md hover:shadow-lg'}
                                   ${isDisabled ? 'disabled-card' : ''}`;
 
                 // 유튜브 임베드 HTML
