@@ -8,6 +8,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- 외부 도메인 사전 연결 (로딩 속도 최적화) -->
+    <link rel="preconnect" href="https://www.youtube.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
     <script>
         tailwind.config = {
             theme: {
@@ -258,9 +261,12 @@
                     card.onclick = () => selectClassPhoto(photo.id);
                 }
 
+                // loading="lazy" 추가
                 card.innerHTML = `
                     <div class="relative aspect-video bg-gray-100">
                         <img src="images/${photo.id}.${photo.ext}" 
+                             loading="lazy"
+                             decoding="async"
                              onerror="this.onerror=null; this.src='${getFallbackImg('반별 사진 ' + photo.id)}';" 
                              alt="${photo.id} 반 사진" 
                              class="w-full h-full object-cover">
@@ -291,12 +297,12 @@
                                   ${isSelected ? 'selected-card' : 'border-gray-200 hover:border-cherry-300 shadow-md hover:shadow-lg'}
                                   ${isDisabled ? 'disabled-card' : ''}`;
 
-                // 유튜브 임베드 HTML
+                // 유튜브 임베드 HTML (loading="lazy" 추가)
                 let youtubeHtml = '';
                 if (photo.yt) {
                     youtubeHtml = `
                         <div class="w-full aspect-video mt-auto border-t border-gray-100">
-                            <iframe src="https://www.youtube.com/embed/${photo.yt}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="w-full h-full"></iframe>
+                            <iframe src="https://www.youtube.com/embed/${photo.yt}" loading="lazy" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="w-full h-full"></iframe>
                         </div>
                     `;
                 }
@@ -316,9 +322,12 @@
                 // 확장자가 따로 지정되어 있으면 그것을 쓰고, 없으면 기본값인 'jpeg'를 사용
                 const extension = photo.ext || 'jpeg';
 
+                // loading="lazy" 추가
                 card.innerHTML = `
                     <div class="relative aspect-square bg-gray-100 cursor-pointer" onclick="${isDisabled ? '' : `selectIndividualPhoto('${photo.id}')`}">
                         <img src="images/${photo.id}.${extension}" 
+                             loading="lazy"
+                             decoding="async"
                              onerror="this.onerror=null; this.src='${getFallbackImg('참가자 ' + photo.id)}';" 
                              alt="${photo.id} 사진" 
                              class="w-full h-full object-cover">
