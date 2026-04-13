@@ -148,14 +148,12 @@
     </div>
 
     <script type="module">
-  // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-analytics.js";
-        // TODO: Add SDKs for Firebase products that you want to use
-        // https://firebase.google.com/docs/web/setup#available-libraries
+        // 1. 필요한 모든 Firebase 기능 불러오기
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Your web app's Firebase configuration
-        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        // 2. 선생님의 Firebase 설정 적용
         const firebaseConfig = {
             apiKey: "AIzaSyBjF3Kvm5d-MWZaG1uUxNPZJyt6l9GUpSg",
             authDomain: "kyeolpiccon.firebaseapp.com",
@@ -166,15 +164,7 @@
             measurementId: "G-EY91TGCYWV"
         };
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-
-        // 환경 설정 분기 (Canvas 테스트용 vs GitHub Pages 실배포용)
-        const isCanvas = typeof __firebase_config !== 'undefined';
-        const firebaseConfig = isCanvas ? JSON.parse(__firebase_config) : myFirebaseConfig;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'cherry-blossom-app';
-        
+        // 3. Firebase 초기화
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
@@ -182,20 +172,16 @@
 
         // 투표 데이터 저장 경로 설정
         function getVotesCollectionRef() {
-            return isCanvas ? collection(db, 'artifacts', appId, 'public', 'data', 'votes') : collection(db, 'votes');
+            return collection(db, 'votes');
         }
         function getVoteDocRef(studentId) {
-            return isCanvas ? doc(db, 'artifacts', appId, 'public', 'data', 'votes', studentId) : doc(db, 'votes', studentId);
+            return doc(db, 'votes', studentId);
         }
 
-        // 인증 초기화 (학생들이 로그인 없이 투표할 수 있도록 익명 로그인 사용)
+        // 인증 초기화 (익명 로그인)
         async function initAuth() {
             try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
+                await signInAnonymously(auth);
             } catch (error) {
                 console.error("인증 에러:", error);
             }
@@ -250,13 +236,6 @@
         function initApp() {
             renderClassPhotos();
             renderIndividualPhotos();
-            
-            // 기존 투표 기록이 있으면 확인 (로컬 스토리지 기반 데모용)
-            const hasVoted = localStorage.getItem('hasVoted_' + new Date().toDateString());
-            if(hasVoted) {
-                // 당일 투표 완료 표시 방지 (필요 시 주석 해제)
-                // showModal('안내', '이미 오늘 투표를 완료하셨습니다.', 'info');
-            }
         }
 
         // 존재하지 않는 이미지에 대한 Placeholder 대체 함수
@@ -375,14 +354,12 @@
 
             const infoText = document.getElementById('classInfoText');
 
-            // 학번 파싱 로직 (예: 10101 -> 1학년 1반 -> '1-1')
             if (idInput.length === 5 && !isNaN(idInput)) {
                 const grade = idInput.charAt(0);
                 const classNum = parseInt(idInput.substring(1, 3), 10);
                 state.userClass = `${grade}-${classNum}`;
                 infoText.innerHTML = `<span class="text-cherry-600 font-bold">확인됨: ${grade}학년 ${classNum}반.</span> 본인 반과 본인 사진은 투표할 수 없습니다.`;
                 
-                // 만약 선택되어 있던 값이 본인 것이 되면 선택 해제
                 if (state.selectedClassId === state.userClass) {
                     state.selectedClassId = null;
                 }
@@ -394,41 +371,34 @@
                 infoText.innerHTML = "학번 5자리를 정확히 입력해주세요.";
             }
 
-            // UI 업데이트
             renderClassPhotos();
             renderIndividualPhotos();
         }
 
         function selectClassPhoto(id) {
-            // 학번 입력 확인
             if(state.userClass === '') {
                 showModal('학번 입력 필요', '투표를 위해 먼저 학번 5자리를 정확히 입력해주세요.', 'warning');
                 document.getElementById('studentId').focus();
                 return;
             }
-
             if (state.selectedClassId === id) {
-                state.selectedClassId = null; // 선택 해제
+                state.selectedClassId = null;
             } else {
-                state.selectedClassId = id; // 선택
+                state.selectedClassId = id;
             }
             renderClassPhotos();
         }
 
         function selectIndividualPhoto(id) {
-             // 학번 입력 확인
              if(state.userClass === '') {
                 showModal('학번 입력 필요', '투표를 위해 먼저 학번 5자리를 정확히 입력해주세요.', 'warning');
                 document.getElementById('studentId').focus();
                 return;
             }
-
             const index = state.selectedIndivIds.indexOf(id);
             if (index > -1) {
-                // 이미 선택된 경우 해제
                 state.selectedIndivIds.splice(index, 1);
             } else {
-                // 새로 선택하는 경우
                 if (state.selectedIndivIds.length >= 3) {
                     showModal('개수 초과', '개인별 사진은 최대 3장까지만 투표할 수 있습니다.', 'warning');
                     return;
@@ -440,7 +410,6 @@
 
         // ------------------ 투표 제출 및 다운로드 ------------------
         async function submitVote() {
-            // 1. 유효성 검사
             if (!currentUser) {
                 showModal('연결 중', '데이터베이스에 연결하고 있습니다. 잠시 후 다시 시도해주세요.', 'warning');
                 return;
@@ -462,7 +431,6 @@
                 return;
             }
 
-            // 2. 투표 데이터 생성
             const voteData = {
                 studentId: state.studentId,
                 name: state.name,
@@ -471,17 +439,10 @@
                 timestamp: new Date().toISOString()
             };
 
-            // 3. Firestore 데이터베이스에 저장
             try {
-                // 학번을 문서 ID로 사용하여 1인 1투표(중복시 덮어쓰기) 구현
                 const voteRef = getVoteDocRef(state.studentId);
                 await setDoc(voteRef, voteData);
-                
-                // 로컬 스토리지에는 오늘 투표했다는 표시만 남김
-                localStorage.setItem('hasVoted_' + new Date().toDateString(), 'true');
-
                 showModal('투표 완료!', '성공적으로 투표가 제출되었습니다. 참여해주셔서 감사합니다.', 'success');
-
             } catch (e) {
                 console.error(e);
                 showModal('오류', '저장 중 문제가 발생했습니다.', 'error');
@@ -495,7 +456,6 @@
             }
 
             try {
-                // Firestore에서 모든 투표 데이터 가져오기
                 const querySnapshot = await getDocs(getVotesCollectionRef());
                 const allVotes = [];
                 querySnapshot.forEach((doc) => {
@@ -507,35 +467,32 @@
                     return;
                 }
 
-                // CSV 데이터 생성 (Excel 호환을 위한 BOM 추가)
                 let csvContent = "\uFEFF"; 
                 csvContent += "학번,이름,반별투표,개인투표1,개인투표2,개인투표3,투표시간\n";
 
                 allVotes.forEach(vote => {
-                const row = [
-                    vote.studentId,
-                    vote.name,
-                    vote.classVote,
-                    vote.individualVotes[0] || '',
-                    vote.individualVotes[1] || '',
-                    vote.individualVotes[2] || '',
-                    new Date(vote.timestamp).toLocaleString('ko-KR')
-                ];
-                // 쉼표 등이 포함된 텍스트 방지
-                const safeRow = row.map(item => `"${String(item).replace(/"/g, '""')}"`).join(',');
-                csvContent += safeRow + "\n";
-            });
+                    const row = [
+                        vote.studentId,
+                        vote.name,
+                        vote.classVote,
+                        vote.individualVotes[0] || '',
+                        vote.individualVotes[1] || '',
+                        vote.individualVotes[2] || '',
+                        new Date(vote.timestamp).toLocaleString('ko-KR')
+                    ];
+                    const safeRow = row.map(item => `"${String(item).replace(/"/g, '""')}"`).join(',');
+                    csvContent += safeRow + "\n";
+                });
 
-            // Blob을 사용하여 다운로드 링크 생성
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.setAttribute("href", url);
-            link.setAttribute("download", `벚꽃사진콘테스트_투표결과_${new Date().getTime()}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.setAttribute("href", url);
+                link.setAttribute("download", `벚꽃사진콘테스트_투표결과_${new Date().getTime()}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
             
             } catch (e) {
                 console.error(e);
@@ -552,7 +509,6 @@
             document.getElementById('modalTitle').innerText = title;
             document.getElementById('modalMessage').innerText = message;
 
-            // 아이콘 및 색상 설정
             let iconName = 'info';
             iconContainer.className = 'mx-auto w-16 h-16 mb-4 flex items-center justify-center rounded-full';
             
@@ -574,7 +530,6 @@
             lucide.createIcons();
 
             modal.classList.remove('hidden');
-            // 애니메이션을 위한 slight delay
             setTimeout(() => {
                 modal.classList.remove('opacity-0');
                 modalContent.classList.remove('scale-95');
@@ -590,10 +545,9 @@
             
             setTimeout(() => {
                 modal.classList.add('hidden');
-            }, 300); // transition 시간과 일치
+            }, 300);
         }
 
-        // 모듈(type="module") 스코프에서는 인라인 이벤트를 위해 전역 연결이 필요함
         window.handleUserInfoChange = handleUserInfoChange;
         window.selectClassPhoto = selectClassPhoto;
         window.selectIndividualPhoto = selectIndividualPhoto;
@@ -601,7 +555,6 @@
         window.downloadCSV = downloadCSV;
         window.closeModal = closeModal;
 
-        // 앱 초기화
         window.onload = initApp;
 
     </script>
