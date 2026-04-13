@@ -58,7 +58,7 @@
         <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-center">
             <div class="flex items-center space-x-2">
                 <i data-lucide="flower-2" class="text-cherry-500 w-8 h-8"></i>
-                <h1 class="text-xl md:text-2xl font-bold text-cherry-700 tracking-tight">봄빛 벚꽃 사진전</h1>
+                <h1 class="text-xl md:text-2xl font-bold text-cherry-700 tracking-tight">결마루 벚꽃 사진전</h1>
             </div>
         </div>
     </header>
@@ -351,7 +351,11 @@
 
             const infoText = document.getElementById('classInfoText');
 
-            if (idInput.length === 5 && !isNaN(idInput)) {
+            if (idInput === '교사') {
+                // 비밀 기능: 선생님 모드
+                state.userClass = 'TEACHER'; // 반별/개인별 본인 제외 로직 무효화
+                infoText.innerHTML = `<span class="text-cherry-600 font-bold">관리자 인증됨: 선생님.</span> 제한 없이 모든 사진에 투표하실 수 있습니다.`;
+            } else if (idInput.length === 5 && !isNaN(idInput)) {
                 const grade = idInput.charAt(0);
                 const classNum = parseInt(idInput.substring(1, 3), 10);
                 state.userClass = `${grade}-${classNum}`;
@@ -411,7 +415,8 @@
                 showModal('연결 중', '데이터베이스에 연결하고 있습니다. 잠시 후 다시 시도해주세요.', 'warning');
                 return;
             }
-            if (state.studentId.length !== 5 || isNaN(state.studentId)) {
+            // 선생님(교사)이 아닐 경우에만 5자리 숫자 검사 진행
+            if (state.studentId !== '교사' && (state.studentId.length !== 5 || isNaN(state.studentId))) {
                 showModal('입력 오류', '학번 5자리를 정확하게 입력해주세요.', 'error');
                 return;
             }
@@ -437,7 +442,10 @@
             };
 
             try {
-                const voteRef = getVoteDocRef(state.studentId);
+                // 선생님 여러 명이 투표할 경우 덮어쓰기 방지를 위해 문서 ID를 다르게 설정
+                const docId = state.studentId === '교사' ? `교사_${state.name}` : state.studentId;
+                const voteRef = getVoteDocRef(docId);
+                
                 await setDoc(voteRef, voteData);
                 showModal('투표 완료!', '성공적으로 투표가 제출되었습니다. 참여해주셔서 감사합니다.', 'success');
             } catch (e) {
