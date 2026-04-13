@@ -55,11 +55,11 @@ Firebase Firestore를 사용하여 학생들의 투표 데이터를 실시간으
 
 ##Firebase 프로젝트 설정
 
-1. Firebase 콘솔에서 새 프로젝트를 생성합니다.
+###1. Firebase 콘솔에서 새 프로젝트를 생성합니다.
 
-1. Authentication에서 익명(Anonymous) 로그인을 활성화합니다.
+###2. Authentication에서 익명(Anonymous) 로그인을 활성화합니다.
 
-1. Firestore Database를 생성하고, 규칙(Rules)을 다음과 같이 설정합니다.
+###3. Firestore Database를 생성하고, 규칙(Rules)을 다음과 같이 설정합니다.
 
 rules_version = '2';
 service cloud.firestore {
@@ -72,10 +72,10 @@ service cloud.firestore {
 }
 
 
-1. 코드에 API 키 적용
+###4. 코드에 API 키 적용
 
 index.html 파일 내부의 firebaseConfig 객체에 본인 프로젝트의 API 키를 입력합니다.
 
-1. GitHub Pages 배포
+###5. GitHub Pages 배포
 
 이 코드와 images 폴더를 GitHub 저장소에 푸시(Push)하고, Settings > Pages에서 배포를 활성화합니다.
